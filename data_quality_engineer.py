@@ -59,13 +59,13 @@ def normalization_and_validation_phones(text) -> dict:
     """
 
     phones_list = re.split(',', re.sub(r'[а-яА-я: \n]', '', text))
+    
 
+    symbol_pattern = r'\b[+]?[78][-_ ]?[-_ \(]?[\d]{3}[-_ \)]?[-_ ]?[\d]{3}[-_ ]?[\d]{2}[-_ ]?[\d]{2}\b'
 
-    symbol_pattern = r'[+]?[78][-_ ]?[\d]{3}[-_ ][\d]{3}[-_ ][\d]{2}[-_ ][\d]{2}'
-    split_pattern = r'[+]?[78][-_ ]?[\d]{10}'
-
-    guess_phones.extend(re.findall(symbol_pattern, text))
-    guess_phones.extend(re.findall(split_pattern, text))
+    for i in range(len(phones_list)):
+        if re.search(symbol_pattern, phones_list[i]):
+            guess_phones.append(phones_list[i])
 
 
     valid, invalid = [], []
@@ -73,7 +73,7 @@ def normalization_and_validation_phones(text) -> dict:
     for i in range(len(phones_list)):
         if phones_list[i] not in guess_phones:
             invalid.append(phones_list[i])
-
+    
     
     for i in range(len(guess_phones)):
         if '_' in guess_phones[i]:
@@ -82,10 +82,16 @@ def normalization_and_validation_phones(text) -> dict:
             guess_phones[i] = guess_phones[i].replace('-', '')
         if ' ' in guess_phones[i]:
             guess_phones[i] = guess_phones[i].replace(' ', '')
-        if guess_phones[i][0] == '+':
-            guess_phones[i] = re.sub('[+]?[78]', '8', guess_phones[i])
+        if '(' in guess_phones[i]:
+            guess_phones[i] = guess_phones[i].replace('(', '')
+        if ')' in guess_phones[i]:
+            guess_phones[i] = guess_phones[i].replace(')', '')
+
         if guess_phones[i][0] == '7':
             guess_phones[i] = guess_phones[i].replace('7', '8', 1)
+        if guess_phones[i][0] not in '78':
+            guess_phones[i] = guess_phones[i]\
+                .replace(guess_phones[i][0], '8'+guess_phones[i][0], 1)
 
 
     for i in range(len(guess_phones)):
@@ -115,6 +121,10 @@ def normalization_and_validation_dates(text) -> dict:
     for i in range(len(dates_list)):
         time_parts = re.split(r'[/._-]+', dates_list[i])
         
+        for i in time_parts:
+            if len(i) == 4:
+                year = i
+
         month = time_parts[1]
         try:
             month = int(month)
@@ -126,10 +136,7 @@ def normalization_and_validation_dates(text) -> dict:
         if month > 12:
             invalid.append(dates_list[i])
             continue
-        
-        for i in time_parts:
-            if len(i) == 4:
-                year = i
+
 
         if len(time_parts[0]) == 2:
             day = time_parts[0]
@@ -140,6 +147,7 @@ def normalization_and_validation_dates(text) -> dict:
             invalid.append(dates_list[i])
             continue
         
+
         valid.append(f'{day}.{month}.{year}')
 
 
@@ -220,11 +228,3 @@ def normalization_and_validation_data(messy_data):
         'inn: ': {'valid: ': inn_valid, 'invalid: ': inn_invalid},
         'cards: ': {'valid: ': cards_valid, 'invalid: ': cards_invalid}
     }
-
-
-
-if __name__ == '__main__':
-    with open('messy_data.txt', 'r', encoding='utf-8') as f:
-        messy_data = f.readlines()
-    
-    print(normalization_and_validation_data(messy_data))
