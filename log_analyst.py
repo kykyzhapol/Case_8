@@ -13,7 +13,7 @@ def detect_sql_injections(log):
         r'((\%27)|(\'))?update',
         r'((\%27)|(\'))?delete',
         r'((\%27)|(\'))?drop',
-        r'((\%27)|(\'))?sleep(\d+)',
+        r'((\%27)|(\'))?sleep\(\d+\)',
         r'exec(\s|\+)+(s|x)p\w+'
         ]
 
@@ -28,6 +28,7 @@ def detect_xss_attempts(log):
         r'<iframe.*?>',
         r'javascript:',
         r'<img.*?src.*?=>',
+        r'<svg.*?>'
         r'alert\(.*?\)',
         r'eval\(.*?\)',
         ]
@@ -42,7 +43,7 @@ def detect_suspicious_user_agents(log):
     suspicious_agents_patterns = [
         r'bot', r'test', r'debug', r'dev', 
         r'admin', r'root', r'system', r'unknown',
-        r'superuser', r'map'
+        r'superuser', r'map', r'scanner', r'crawler'
         ]
     
     for pattern in suspicious_agents_patterns:
