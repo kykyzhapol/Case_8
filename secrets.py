@@ -1,4 +1,4 @@
-from re import *
+import re
 
 
 def find_secrets(text):
