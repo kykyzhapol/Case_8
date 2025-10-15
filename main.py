@@ -8,14 +8,14 @@ import calendar
 def find_and_validate_credit_cards(text) -> dict:
     guess_numbers = []
     """
-    Находит номера карт и проверяет их алгоритмом Луна
-    Возвращает: {'valid': [], 'invalid': []}
+    Finds card numbers and verifies them using the Moon algorithm
+    Returns: {'valid': [], 'invalid': []}
     """
 
-    # Алгоритм Луна для справки:
-    # 1. Удаляем нецифровые символы
-    # 2. Проверяем длину (16 цифр)
-    # 3. Применяем алгоритм проверки
+    # Moon's algorithm for reference:
+    #1. Deleting non-numeric characters
+    # 2. Check the length (16 digits)
+    #3. We apply the verification algorithm
 
     dash_pattern = r'[\d]{4}[-][\d]{4}[-][\d]{4}[-][\d]{4}'
     underscore_pattern = r'[\d]{4}[_][\d]{4}[_][\d]{4}[_][\d]{4}'
@@ -47,8 +47,8 @@ def find_and_validate_credit_cards(text) -> dict:
     for numbers in guess_numbers:
         total = 0
         for i in range(16):
-            digit = int(numbers[15 - i])  # Идем справа налево
-            if i % 2 != 0:  # Для каждой второй цифры (начиная с предпоследней)
+            digit = int(numbers[15 - i])  # Go from right to left
+            if i % 2 != 0:  # For every second digit (starting from the penultimate one)
                 digit *= 2
                 if digit > 9:
                     digit -= 9
@@ -164,8 +164,8 @@ def find_system_info(text) -> dict:
 
 def decode_messages(text) -> dict:
     """
-    Находит и расшифровывает сообщения
-    Возвращает: {'base64': [], 'hex': [], 'rot13': []}
+    Finds and decrypts messages
+    Returns: {'base64': [], 'hex': [], 'rot13': []}
 
     In base64 encoding, the character set is [A-Z, a-z, 0-9, and + /].
     If the rest length is less than 4, the string is padded with '=' characters.
@@ -219,6 +219,11 @@ def decode_messages(text) -> dict:
 
 
 def detect_sql_injections(log) -> bool:
+    '''
+    the function searches for signs sql injection in the text and creates a list of them
+    :param log:
+    :return: bool
+    '''
     sql_patterns = [
         r'\-\-',
         r'((\%27)|(\')).*?(or|and)',
@@ -241,6 +246,11 @@ def detect_sql_injections(log) -> bool:
     return False
 
 def detect_xss_attempts(log) -> bool:
+    '''
+    the function searches for signs xss attempts in the text and creates a list of them
+    :param log:
+    :return: bool
+    '''
     xss_patterns = [
         r'<script.*?>.*?</script>',
         r'<iframe.*?>',
@@ -258,6 +268,11 @@ def detect_xss_attempts(log) -> bool:
     
 
 def detect_suspicious_user_agents(log) -> bool:
+    '''
+    the function searches for signs suspicious user agents in the text and creates a list of them
+    :param log:
+    :return: bool
+    '''
     suspicious_agents_patterns = [
         r'bot', r'test', r'debug', r'dev', 
         r'admin', r'root', r'system', r'unknown',
@@ -271,6 +286,11 @@ def detect_suspicious_user_agents(log) -> bool:
 
 
 def detect_failed_logins(log) -> bool:
+    '''
+    the function searches for failed logins in the text and creates a list of them
+    :param log:
+    :return: bool
+    '''
     failed_login_patterns = [
             r'\s([45][0-9][0-9])\s',
             r'status.*?[45][0-9][0-9]'
@@ -283,6 +303,12 @@ def detect_failed_logins(log) -> bool:
 
 
 def log_analysis(log_text) -> dict:
+    '''
+    the function creates a dictionary from the data received from detect_sql_injections,
+    detect_xss_attempts, detect_suspicious_user_agents and detect_failed_logins
+    :param log_text:
+    :return: dict
+    '''
     sql_injections = []
     xss_attempts = []
     suspicious_user_agents = []
@@ -315,8 +341,8 @@ def log_analysis(log_text) -> dict:
 def normalization_and_validation_cards(text) -> dict:
     guess_numbers = []
     """
-    Находит номера карт и проверяет их алгоритмом Луна
-    Возвращает: {'valid': [], 'invalid': []}
+    Finds the card numbers and checks them using the Luna algorithm
+    Returns: {'valid': [], 'invalid': []}
     """
 
     dash_pattern = r'[\d]{4}[-][\d]{4}[-][\d]{4}[-][\d]{4}'
@@ -364,8 +390,8 @@ def normalization_and_validation_cards(text) -> dict:
 def normalization_and_validation_phones(text) -> dict:
     guess_phones = []
     """
-    Находит номера телефонов и проверяет их
-    Возвращает: {'valid': [], 'invalid': []}
+    Finds phone numbers and checks them
+    Returns: {'valid': [], 'invalid': []}
     """
 
     phones_list = re.split(',', re.sub(r'[а-яА-я: \n]', '', text))
@@ -417,8 +443,8 @@ def normalization_and_validation_phones(text) -> dict:
 def normalization_and_validation_dates(text) -> dict:
     guess_dates = []
     """
-    Находит ааты и проверяет их
-    Возвращает: {'valid': [], 'invalid': []}
+    Finds dates and checks them
+    Returns: {'valid': [], 'invalid': []}
     """
 
     dates_list = re.split(',', re.sub(r'[а-яА-я: \n]', '', text))
@@ -467,8 +493,8 @@ def normalization_and_validation_dates(text) -> dict:
 def normalization_and_validation_inn(text) -> dict:
     guess_inn = []
     """
-    Находит номера ИНН и проверяет их
-    Возвращает: {'valid': [], 'invalid': []}
+    Finds the INN numbers and checks them
+    Returns: {'valid': [], 'invalid': []}
     """
 
     inn_list = re.split(',', re.sub(r'[а-яА-я: \n]', '', text))
@@ -500,8 +526,10 @@ def normalization_and_validation_inn(text) -> dict:
 
 def normalization_and_validation_data(messy_data) -> dict:
     """
-    Приводит данные к единому формату и проверяет их
-    Возвращает: {
+    the function creates a dictionary from the data received from
+    normalization_and_validation_cards, normalization_and_validation_phones,
+    normalization_and_validation_dates and normalization_and_validation_inn
+    Returns: {
         'phones': {'valid': [], 'invalid': []},
         'dates': {'normalized': [], 'invalid': []},
         'inn': {'valid': [], 'invalid': []},
@@ -543,7 +571,7 @@ def normalization_and_validation_data(messy_data) -> dict:
 
 def generate_comprehensive_report(main_text, log_text, messy_data):
     """
-    Генерирует полный отчет о расследовании
+    Generates a full investigation report
     """
     report = {
         'financial_data': find_and_validate_credit_cards(main_text),
@@ -558,12 +586,11 @@ def generate_comprehensive_report(main_text, log_text, messy_data):
 
 
 def print_report(report):
-    """Красиво выводит отчет"""
+    """It displays the report"""
     print("=" * 50)
     print("ОТЧЕТ ОПЕРАЦИИ 'DATA SHIELD'")
     print("=" * 50)
     
-    # Вывод результатов каждой роли
     sections = [
         ("ФИНАНСОВЫЕ ДАННЫЕ", report['financial_data']),
         ("СЕКРЕТНЫЕ КЛЮЧИ", report['secrets']),
@@ -576,10 +603,8 @@ def print_report(report):
     for title, data in sections:
         print(f"\n{title}:")
         print("-" * 30)
-        # Детальный вывод данных...
 
 if __name__ == "__main__":
-    # Чтение файлов с данными
     with open('data_leak_sample.txt', 'r', encoding='utf-8') as f:
         main_text = f.read()
     
@@ -589,6 +614,5 @@ if __name__ == "__main__":
     with open('messy_data.txt', 'r', encoding='utf-8') as f:
         messy_data = f.read()
 
-    # Запуск расследования
     report = generate_comprehensive_report(main_text, log_text, messy_data)
     print_report(report)
