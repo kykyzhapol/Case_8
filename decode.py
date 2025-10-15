@@ -9,6 +9,7 @@ def decode_messages(text) -> dict:
     """
     Находит и расшифровывает сообщения
     Возвращает: {'base64': [], 'hex': [], 'rot13': []}
+    
 
     In base64 encoding, the character set is [A-Z, a-z, 0-9, and + /].
     If the rest length is less than 4, the string is padded with '=' characters.
