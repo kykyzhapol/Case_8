@@ -27,7 +27,6 @@ def find_and_validate_credit_cards(text) -> dict:
     guess_numbers.extend(re.findall(underscore_pattern, text))
     guess_numbers.extend(re.findall(space_pattern, text))
     guess_numbers.extend(re.findall(split_pattern, text))
-    print(guess_numbers)
 
 
     for i in range(len(guess_numbers)):
@@ -37,7 +36,6 @@ def find_and_validate_credit_cards(text) -> dict:
             guess_numbers[i] = guess_numbers[i].replace('_', '')
         if ' ' in guess_numbers[i]:
             guess_numbers[i] = guess_numbers[i].replace(' ', '')
-    print(guess_numbers)
 
 
     valid = []
@@ -164,9 +162,21 @@ def find_system_info(text) -> dict:
 
 def decode_messages(text) -> dict:
     """
-    Search and decode all masseges
-    :return: {'base64': [], 'hex': [], 'rot13': []}
+    Finds and decrypts messages
+    Returns: {'base64': [], 'hex': [], 'rot13': []}
+
+    In base64 encoding, the character set is [A-Z, a-z, 0-9, and + /].
+    If the rest length is less than 4, the string is padded with '=' characters.
+    re for base64: (?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?
+
+    re for hex code: ^[A-Z|\d]*
+
+    re for rot13: ^[a-zA-Z]*
     """
+    # Base64: VGhpcyBpcyBhIHNlY3JldCBtZXNzYWdlIQ==
+    # Hex: 0x4D7950617373 или \x48\x65\x6C\x6C\x6F
+    # ROT13: Gur cnffjbeq vf Summer2024!
+
     decode_base64 = []
     decode_hex = []
     decode_rot13 = []
@@ -217,6 +227,7 @@ def decode_messages(text) -> dict:
         decode_rot13.append(decoded)
 
     return {'base64': decode_base64, 'hex': decode_hex, 'rot13': decode_rot13}
+
 
 
 def detect_sql_injections(log) -> bool:
@@ -342,8 +353,8 @@ def log_analysis(log_text) -> dict:
 def normalization_and_validation_cards(text) -> dict:
     guess_numbers = []
     """
-    Finds the card numbers and checks them using the Luna algorithm
-    Returns: {'valid': [], 'invalid': []}
+    Находит номера карт и проверяет их алгоритмом Луна
+    Возвращает: {'valid': [], 'invalid': []}
     """
 
     dash_pattern = r'[\d]{4}[-][\d]{4}[-][\d]{4}[-][\d]{4}'
@@ -391,8 +402,8 @@ def normalization_and_validation_cards(text) -> dict:
 def normalization_and_validation_phones(text) -> dict:
     guess_phones = []
     """
-    Finds phone numbers and checks them
-    Returns: {'valid': [], 'invalid': []}
+    Находит номера телефонов и проверяет их
+    Возвращает: {'valid': [], 'invalid': []}
     """
 
     phones_list = re.split(',', re.sub(r'[а-яА-я: \n]', '', text))
@@ -410,7 +421,7 @@ def normalization_and_validation_phones(text) -> dict:
     for i in range(len(phones_list)):
         if phones_list[i] not in guess_phones:
             invalid.append(phones_list[i])
-    
+
     
     for i in range(len(guess_phones)):
         if '_' in guess_phones[i]:
@@ -444,8 +455,8 @@ def normalization_and_validation_phones(text) -> dict:
 def normalization_and_validation_dates(text) -> dict:
     guess_dates = []
     """
-    Finds dates and checks them
-    Returns: {'valid': [], 'invalid': []}
+    Находит ааты и проверяет их
+    Возвращает: {'valid': [], 'invalid': []}
     """
 
     dates_list = re.split(',', re.sub(r'[а-яА-я: \n]', '', text))
@@ -494,8 +505,8 @@ def normalization_and_validation_dates(text) -> dict:
 def normalization_and_validation_inn(text) -> dict:
     guess_inn = []
     """
-    Finds the INN numbers and checks them
-    Returns: {'valid': [], 'invalid': []}
+    Находит номера ИНН и проверяет их
+    Возвращает: {'valid': [], 'invalid': []}
     """
 
     inn_list = re.split(',', re.sub(r'[а-яА-я: \n]', '', text))
@@ -525,12 +536,10 @@ def normalization_and_validation_inn(text) -> dict:
 
 
 
-def normalization_and_validation_data(messy_data) -> dict:
+def normalization_and_validation_data(messy_data):
     """
-    the function creates a dictionary from the data received from
-    normalization_and_validation_cards, normalization_and_validation_phones,
-    normalization_and_validation_dates and normalization_and_validation_inn
-    Returns: {
+    Приводит данные к единому формату и проверяет их
+    Возвращает: {
         'phones': {'valid': [], 'invalid': []},
         'dates': {'normalized': [], 'invalid': []},
         'inn': {'valid': [], 'invalid': []},
@@ -601,9 +610,7 @@ def print_report(report):
         ("НОРМАЛИЗОВАННЫЕ ДАННЫЕ", report['normalized_data'])
     ]
     
-    for title, data in sections:
-        print(f"\n{title}:")
-        print("-" * 30)
+    print(sections)
 
 if __name__ == "__main__":
     with open('data_leak_sample.txt', 'r', encoding='utf-8') as f:
@@ -613,8 +620,7 @@ if __name__ == "__main__":
         log_text = f.read()
         
     with open('messy_data.txt', 'r', encoding='utf-8') as f:
-        messy_data = f.read()
+        messy_data = f.readlines()
 
     report = generate_comprehensive_report(main_text, log_text, messy_data)
     print_report(report)
-
