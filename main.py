@@ -77,7 +77,7 @@ def find_secrets(text) -> list:
     reg_ex = fr'({num}|{letters}|{symbols})+'
 
     for r_item in re.finditer(reg_ex, text):
-        secrets.append(r_item)
+        secrets.append(r_item.group())
 
     secrets = list(set(secrets))
 
@@ -628,5 +628,6 @@ if __name__ == "__main__":
     
     report = generate_comprehensive_report(main_text, log_text, messy_data)
     print_report(report)
+
 
 
