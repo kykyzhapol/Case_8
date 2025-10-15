@@ -622,5 +622,10 @@ if __name__ == "__main__":
     with open('messy_data.txt', 'r', encoding='utf-8') as f:
         messy_data = f.readlines()
 
+    with open('export_data.txt', 'w', encoding='utf-8') as f:
+        f.write(str(report))
+    
+    
     report = generate_comprehensive_report(main_text, log_text, messy_data)
     print_report(report)
+
