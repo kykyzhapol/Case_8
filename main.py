@@ -164,58 +164,59 @@ def find_system_info(text) -> dict:
 
 def decode_messages(text) -> dict:
     """
-    Finds and decrypts messages
-    Returns: {'base64': [], 'hex': [], 'rot13': []}
-
-    In base64 encoding, the character set is [A-Z, a-z, 0-9, and + /].
-    If the rest length is less than 4, the string is padded with '=' characters.
-    re for base64: (?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?
-
-    re for hex code: ^[A-Z|\d]*
-
-    re for rot13: ^[a-zA-Z]*
+    Search and decode all masseges
+    :return: {'base64': [], 'hex': [], 'rot13': []}
     """
-    # Base64: VGhpcyBpcyBhIHNlY3JldCBtZXNzYWdlIQ==
-    # Hex: 0x4D7950617373 или \x48\x65\x6C\x6C\x6F
-    # ROT13: Gur cnffjbeq vf Summer2024!
-
-
     decode_base64 = []
     decode_hex = []
     decode_rot13 = []
 
+    base64_pattern = r'\b(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?\b'
+    hex_pattern = r'(?:0x|\\x)?([A-Fa-f0-9]{2,})+'
+    rot13_pattern = r'\b[A-Za-z]{4,}\b'
 
-    base_code = re.findall(r'(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?', text)
-    hex_code = re.findall(r'[A-Z|\d|' '?]*', text)
-    rot13_code = re.findall(r'[A-Za-z|' '?]*', text)
+    #base64 searching
+    base64_matches = re.findall(base64_pattern, text)
+    for code in base64_matches:
+        if code != '':
+            try:
+                decoded = base64.b64decode(code).decode('utf-8')
+                decode_base64.append(decoded)
+            except (UnicodeDecodeError, ValueError):
+                continue
 
+    #Hex searching
+    hex_matches = re.findall(hex_pattern, text)
+    for code in hex_matches:
+        try:
+            #deliting trash
+            clean_hex = code.replace(' ', '').replace('0x', '').replace('\\x', '')
+            #checing len, if len isn't even, it is not a hex code
+            if len(clean_hex) % 2 == 0:
+                decoded = bytes.fromhex(clean_hex).decode('utf-8')
+                decode_hex.append(decoded)
+        except (ValueError, TypeError):
+            continue
 
-    for code_to_decode in base_code:
-        if code_to_decode is not None:
-            decode_base64.append(base64.b64decode(code_to_decode).decode('utf-8'))
+    #Decoding rot13
+    def rot13_decode(s):
+        result = []
+        for char in s:
+            if 'a' <= char <= 'z':
+                result.append(chr((ord(char) - ord('a') + 13) % 26 + ord('a')))
+            elif 'A' <= char <= 'Z':
+                result.append(chr((ord(char) - ord('A') + 13) % 26 + ord('A')))
+            else:
+                result.append(char)
+        return ''.join(result) #
 
-    for code_to_decode in hex_code:
-        if code_to_decode is not None:
-            clean_hex = code_to_decode.replace(' ', '').lower().lstrip('0x')
-            decode_hex.append(bytes.fromhex(clean_hex).decode('ascii'))
-
-    fst_part = [chr(i) for i in range(ord('a'), ord('n'))]
-    scd_part = [chr(i) for i in range(ord('n'), ord('z') + 1)]
-    for code_to_decode in rot13_code:
-        if code_to_decode is not None:
-            decode = []
-            for letter in code_to_decode:
-                if letter in fst_part:
-                    decode.append(scd_part[fst_part.index(letter)])
-                elif letter in scd_part:
-                    decode.append(fst_part[scd_part.index(letter)])
-                else:
-                    decode.append(' ')
-            decode_rot13.append(*decode)
-
+    #search and decode rot13
+    rot13_matches = re.findall(rot13_pattern, text)
+    for code in rot13_matches:
+        decoded = rot13_decode(code)
+        decode_rot13.append(decoded)
 
     return {'base64': decode_base64, 'hex': decode_hex, 'rot13': decode_rot13}
-
 
 
 def detect_sql_injections(log) -> bool:
@@ -616,3 +617,4 @@ if __name__ == "__main__":
 
     report = generate_comprehensive_report(main_text, log_text, messy_data)
     print_report(report)
+
