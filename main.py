@@ -134,7 +134,7 @@ def find_email_info(text) -> list:
     letters_low = r'[a-z]'
     letters_up = r'[A-Z]'
     reg_ex = fr'({num}|{letters_low}|{letters_up}|{symbols})+'
-    reg_all = fr'(?=(({reg_ex})@securecorp.com))'
+    reg_all = fr'(?=(({reg_ex})@({letters_low})+.com))'
 
     for r_item in re.finditer(reg_all, text):
         email_info.append(r_item.group(1))
@@ -628,4 +628,5 @@ if __name__ == "__main__":
     
     report = generate_comprehensive_report(main_text, log_text, messy_data)
     print_report(report)
+
 
